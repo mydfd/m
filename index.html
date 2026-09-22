@@ -1,0 +1,899 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Optimized Social Meta Tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Watch trending live videos and media updates with fast loading and mobile-friendly sharing." />
+    <meta name="robots" content="index,follow" />
+    <meta name="theme-color" content="#81103C" />
+
+    <!-- Open Graph (Facebook, WhatsApp, Telegram, LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TinyURL" />
+    <meta property="og:title" content="TinyURL: URL Shortener, Branded Short Links & Analytics" />
+    <meta property="og:description" content="Watch trending live videos and media updates with fast loading and mobile-friendly sharing." />
+    <meta property="og:url" content="https://9to5mac.com" />
+    <meta property="og:image" content="https://i0.wp.com/9to5mac.com/wp-content/uploads/sites/6/2022/07/whatsapp-generic-ios.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="TinyURL Preview" />
+
+    <!-- X / Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TinyURL: URL Shortener, Branded Short Links & Analytics" />
+    <meta name="twitter:description" content="Watch trending live videos and media updates with fast loading and mobile-friendly sharing." />
+    <meta name="twitter:image" content="https://i0.wp.com/9to5mac.com/wp-content/uploads/sites/6/2022/07/whatsapp-generic-ios.jpg" />
+    <title>TinyURL: URL Shortener, Branded Short Links & Analytics</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            /* light background */
+            --card: #ffffff;
+            --muted: #6b7280;
+            --accent: #2563eb;
+            /* blue */
+            --accent-hover: #1e40af;
+            --live-bg: #ef4444;
+            /* red */
+            --btn-border: #e6e6e6;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial;
+            background: var(--bg);
+            color: #0f172a;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            padding: 20px;
+        }
+
+        /* gallery grid: 4 items per row on desktop */
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* responsive breakpoints */
+
+        @media (max-width:1024px) {
+            .gallery {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            /* tablet landscape */
+        }
+
+        @media (max-width:768px) {
+            .gallery {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            /* tablet / large phones */
+        }
+
+        @media (max-width:420px) {
+            .gallery {
+                grid-template-columns: repeat(1, 1fr);
+            }
+            /* small phones */
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .thumb-wrap {
+            position: relative;
+            padding-top: 56.25%;
+            /* 16:9 ratio */
+            background: linear-gradient(180deg, #eef2ff 0%, #ffffff 100%);
+        }
+
+        .thumb {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Play button overlay */
+
+        .play-btn {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(2, 6, 23, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: background .15s ease, transform .08s ease;
+            z-index: 4;
+        }
+
+        .play-btn:hover,
+        .play-btn:focus {
+            background: rgba(2, 6, 23, 0.8);
+            transform: translate(-50%, -50%) scale(1.03);
+        }
+
+        .play-btn svg {
+            width: 28px;
+            height: 28px;
+            fill: #fff
+        }
+
+        /* Live badge top-left */
+
+        .live-badge {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            padding: 6px 8px;
+            border-radius: 999px;
+            background: var(--live-bg);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 5;
+            box-shadow: 0 6px 12px rgba(239, 68, 68, 0.12);
+        }
+
+        /* segmented button group */
+
+        .segmented {
+            display: flex;
+            border-top: 1px solid var(--btn-border);
+            background: transparent;
+        }
+
+        .segmented a {
+            flex: 1 1 0;
+            text-align: center;
+            padding: 12px 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            color: #fff;
+            border-right: 1px solid var(--btn-border);
+            background: #81103C;
+            transition: background .12s ease, color .12s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .segmented a:last-child {
+            border-right: 0
+        }
+
+        /* Hover / active styles (also applies on touch devices via JS class) */
+
+        .segmented a:hover,
+        .segmented a:focus,
+        .segmented a.touch-active {
+            background: C5527A;
+            color: #fff;
+        }
+
+        /* small helper to make the image clickable area accessible */
+
+        .thumb-link {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+        }
+
+        /* make the card footer separate from thumbnail */
+
+        .card-footer {
+            display: flex;
+            flex-direction: column
+        }
+
+        /* small accessible focus ring */
+
+        a:focus {
+            outline: 3px solid rgba(37, 99, 235, 0.14);
+            outline-offset: 2px
+        }
+
+        /* Desktop-only empty state */
+        #desktop-empty-state {
+            display: none;
+        }
+
+        @media (min-width: 769px) {
+            body.desktop-empty {
+                padding: 0;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            body.desktop-empty > *:not(#desktop-empty-state) {
+                display: none !important;
+            }
+
+            body.desktop-empty #desktop-empty-state {
+                display: flex !important;
+            }
+
+            body.desktop-empty #desktop-empty-state {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                min-height: 100vh;
+                font-size: 28px;
+                font-weight: 600;
+                color: #6b7280;
+            }
+        }
+    </style>
+    <!--
+    IMAGE POOL SECTION
+    ------------------
+    Place your source image URLs below inside the `imagePool` array.
+    Every 10 seconds the script will randomly pick 20 URLs from this pool
+    and assign them to the 20 `.thumb` images in the page.
+
+    Usage:
+    - Replace the example URLs below with your own image URLs.
+    - Keep at least 5 unique URLs for best results; if the pool has fewer
+      than 20 items the script will allow repeats.
+  -->
+    <script id="image-pool">
+        // Put your image URLs here (example placeholders below).
+        // Replace these with your WhatsApp/image URLs or CDN links.
+        window._imagePool = [
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/1.webp",
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/2.webp",
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/3.webp",
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/4.webp",
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/5.webp",
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/6.webp",
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/7.webp",
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/8.webp",
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/9.webp",
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/10.webp",
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/11.webp",
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/12.webp",
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/13.webp",
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/14.webp",
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/15.webp",
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/16.webp",
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/17.webp",
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/18.webp",
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/19.webp",
+            "https://baa.yfs.mybluehost.me/website_8d25a29d/akas/20.webp",
+        ];
+
+        // Configuration: how many cards to update and interval in milliseconds
+        window._imagePoolConfig = {
+            updateInterval: 60000, // 60000 ms = 60 seconds
+            cardsToFill: 20
+        };
+
+        // Helper: pick N random items from array (without repeats if possible)
+        function pickRandomN(arr, n) {
+            if (!Array.isArray(arr) || arr.length === 0) return [];
+            var result = [];
+            var copy = arr.slice();
+            if (copy.length >= n) {
+                for (var i = 0; i < n; i++) {
+                    var idx = Math.floor(Math.random() * copy.length);
+                    result.push(copy.splice(idx, 1)[0]);
+                }
+            } else {
+                // not enough unique items, allow repeats
+                for (var i = 0; i < n; i++) {
+                    result.push(arr[Math.floor(Math.random() * arr.length)]);
+                }
+            }
+            return result;
+        }
+
+        // Do the update after DOM ready
+        document.addEventListener('DOMContentLoaded', function() {
+            function updateThumbs() {
+                var pool = window._imagePool || [];
+                var cfg = window._imagePoolConfig || {
+                    updateInterval: 5000,
+                    cardsToFill: 20
+                };
+                var thumbs = document.querySelectorAll('.thumb');
+                var targetCount = Math.min(cfg.cardsToFill, thumbs.length);
+                var picks = pickRandomN(pool, targetCount);
+
+                // Apply with a small fade transition for smoothness
+                for (var i = 0; i < targetCount; i++) {
+                    (function(i) {
+                        var img = thumbs[i];
+                        if (!img) return;
+                        // Add CSS transition if not present
+                        img.style.transition = 'opacity 300ms ease';
+                        img.style.opacity = '0.02';
+                        // Use timeout to allow fade-out, then change src and fade-in
+                        setTimeout(function() {
+                            img.src = picks[i] || picks[i % picks.length] || '';
+                            // Ensure image loads and then fade in (best-effort)
+                            img.onload = function() {
+                                img.style.opacity = '1';
+                            };
+                            // Fallback in case onload doesn't fire quickly
+                            setTimeout(function() {
+                                img.style.opacity = '1';
+                            }, 350);
+                        }, 140);
+                    })(i);
+                }
+            }
+
+            // Initial fill
+            updateThumbs();
+
+            // Interval update
+            var cfg = window._imagePoolConfig || {
+                updateInterval: 5000
+            };
+            setInterval(updateThumbs, cfg.updateInterval || 5000);
+        });
+    </script>
+    <script id="url-pool">
+        // URL POOL (only raw URLs)
+        // Put your raw URLs (strings) here. Script will pick random URLs and
+        // assign them to thumb-link, play-btn, and segmented buttons.
+        window._urlPool = [
+
+            "https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+            "https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+			"https://t.co/TzO2g1jI69",
+        ];
+
+        window._urlPoolConfig = {
+            updateInterval: 60000 // 60 seconds
+        };
+
+        function pickRandomUrls(arr, n) {
+            if (!Array.isArray(arr) || arr.length === 0) return [];
+            var result = [];
+            var copy = arr.slice();
+            if (copy.length >= n) {
+                for (var i = 0; i < n; i++) {
+                    var idx = Math.floor(Math.random() * copy.length);
+                    result.push(copy.splice(idx, 1)[0]);
+                }
+            } else {
+                for (var i = 0; i < n; i++) {
+                    result.push(arr[Math.floor(Math.random() * arr.length)]);
+                }
+            }
+            return result;
+        }
+
+        function assignUrlsToCards() {
+            var pool = window._urlPool || [];
+            if (!Array.isArray(pool) || pool.length === 0) return;
+
+            var cards = document.querySelectorAll('.card');
+            var count = cards.length;
+            var picks = pickRandomUrls(pool, count);
+
+            for (var i = 0; i < count; i++) {
+                (function(i) {
+                    var card = cards[i];
+                    var pick = picks[i] || '';
+                    if (!card) return;
+
+                    // thumb-link
+                    var thumbLink = card.querySelector('.thumb-link');
+                    if (thumbLink) thumbLink.href = pick;
+
+                    // play button (on image)
+                    var playBtn = card.querySelector('.play-btn');
+                    if (playBtn) playBtn.href = pick;
+
+                    // segmented buttons: for simplicity all three get the same URL
+                    var segPlay = card.querySelector('.seg-play');
+                    var segDownload = card.querySelector('.seg-download');
+                    var segLive = card.querySelector('.seg-live');
+                    if (segPlay) segPlay.href = pick;
+                    if (segDownload) segDownload.href = pick;
+                    if (segLive) segLive.href = pick;
+                })(i);
+            }
+            console.log('Assigned URLs to', count, 'cards at', new Date().toISOString());
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            assignUrlsToCards();
+            var cfg = window._urlPoolConfig || {
+                updateInterval: 60000
+            };
+            setInterval(assignUrlsToCards, cfg.updateInterval || 60000);
+        });
+    </script>
+</head>
+
+<body>
+
+    <script id="desktop-empty-state-script">
+        (function () {
+            function updateDesktopState() {
+                var isDesktop =
+                    window.matchMedia('(min-width: 769px) and (hover: hover) and (pointer: fine)').matches;
+                document.body.classList.toggle('desktop-empty', isDesktop);
+            }
+
+            updateDesktopState();
+            window.addEventListener('resize', updateDesktopState);
+        })();
+    </script>
+
+    <!--
+    Example grid. There are 12 cards below for demo. Each card's interactive elements
+    are regular <a> tags so you can simply replace the href values with your real links.
+
+    How to add links:
+    - Play button: change href on the element with class "play-btn" (within each card)
+    - Image click: change href on the element with class "thumb-link"
+    - Play Now / Download / Live: change href on the corresponding <a> in the .segmented group
+
+    Each card uses ids: card-1, card-2 ... so you can target them from JS if you want to
+    change links programmatically.
+  -->
+
+    <div id="desktop-empty-state" aria-hidden="true">Empty</div>
+
+    <div class="gallery" id="gallery">
+        <!-- Card template repeated. Replace src with your image and hrefs with your links -->
+
+        <!-- Card 1 -->
+        <div class="card" id="card-1">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_8d25a29d/akas/1.webp" alt="Video thumbnail">
+
+                <!-- Clickable image link (change href) -->
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+
+                <!-- Live badge (visible on cards that are live) -->
+                <div class="live-badge">LIVE</div>
+
+                <!-- Play button (change href) -->
+                <a class="play-btn" href="" aria-label="Play video">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg>
+        </a>
+            </div>
+
+            <div class="card-footer">
+                <div class="segmented">
+                    <!-- Play Now -->
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <!-- Download -->
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <!-- Live -->
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="card" id="card-2">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_8d25a29d/akas/1.webp" alt="Video thumbnail">
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+                <div class="live-badge">LIVE</div>
+                <a class="play-btn" href="" aria-label="Play video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></a>
+            </div>
+            <div class="card-footer">
+                <div class="segmented">
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="card" id="card-3">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_1b0c3949//a/b/c/d/e/f/2.webp" alt="Video thumbnail">
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+                <div class="live-badge">LIVE</div>
+                <a class="play-btn" href="" aria-label="Play video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></a>
+            </div>
+            <div class="card-footer">
+                <div class="segmented">
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="card" id="card-4">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_1b0c3949//a/b/c/d/e/f/3.webp" alt="Video thumbnail">
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+                <div class="live-badge">LIVE</div>
+                <a class="play-btn" href="" aria-label="Play video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></a>
+            </div>
+            <div class="card-footer">
+                <div class="segmented">
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="card" id="card-5">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_1b0c3949//a/b/c/d/e/f/4.webp" alt="Video thumbnail">
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+                <div class="live-badge">LIVE</div>
+                <a class="play-btn" href="" aria-label="Play video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></a>
+            </div>
+            <div class="card-footer">
+                <div class="segmented">
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="card" id="card-6">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_1b0c3949//a/b/c/d/e/f/5.webp" alt="Video thumbnail">
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+                <div class="live-badge">LIVE</div>
+                <a class="play-btn" href="" aria-label="Play video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></a>
+            </div>
+            <div class="card-footer">
+                <div class="segmented">
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 7 -->
+        <div class="card" id="card-7">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_1b0c3949//a/b/c/d/e/f/6.webp" alt="Video thumbnail">
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+                <div class="live-badge">LIVE</div>
+                <a class="play-btn" href="" aria-label="Play video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></a>
+            </div>
+            <div class="card-footer">
+                <div class="segmented">
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 8 -->
+        <div class="card" id="card-8">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_1b0c3949//a/b/c/d/e/f/7.webp" alt="Video thumbnail">
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+                <div class="live-badge">LIVE</div>
+                <a class="play-btn" href="" aria-label="Play video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></a>
+            </div>
+            <div class="card-footer">
+                <div class="segmented">
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 9 -->
+        <div class="card" id="card-9">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_1b0c3949//a/b/c/d/e/f/8.webp" alt="Video thumbnail">
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+                <div class="live-badge">LIVE</div>
+                <a class="play-btn" href="" aria-label="Play video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></a>
+            </div>
+            <div class="card-footer">
+                <div class="segmented">
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 10 -->
+        <div class="card" id="card-10">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_1b0c3949//a/b/c/d/e/f/9.webp" alt="Video thumbnail">
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+                <div class="live-badge">LIVE</div>
+                <a class="play-btn" href="" aria-label="Play video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></a>
+            </div>
+            <div class="card-footer">
+                <div class="segmented">
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 11 -->
+        <div class="card" id="card-11">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_1b0c3949//a/b/c/d/e/f/10.webp" alt="Video thumbnail">
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+                <div class="live-badge">LIVE</div>
+                <a class="play-btn" href="" aria-label="Play video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></a>
+            </div>
+            <div class="card-footer">
+                <div class="segmented">
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 12 -->
+        <div class="card" id="card-12">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_1b0c3949//a/b/c/d/e/f/11.webp" alt="Video thumbnail">
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+                <div class="live-badge">LIVE</div>
+                <a class="play-btn" href="" aria-label="Play video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></a>
+            </div>
+            <div class="card-footer">
+                <div class="segmented">
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+        <!-- Card 13 -->
+        <div class="card" id="card-12">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_1b0c3949//a/b/c/d/e/f/12.webp" alt="Video thumbnail">
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+                <div class="live-badge">LIVE</div>
+                <a class="play-btn" href="" aria-label="Play video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></a>
+            </div>
+            <div class="card-footer">
+                <div class="segmented">
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+        <!-- Card 14 -->
+        <div class="card" id="card-12">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_1b0c3949//a/b/c/d/e/f/13.webp" alt="Video thumbnail">
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+                <div class="live-badge">LIVE</div>
+                <a class="play-btn" href="" aria-label="Play video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></a>
+            </div>
+            <div class="card-footer">
+                <div class="segmented">
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+        <!-- Card 15 -->
+        <div class="card" id="card-12">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_1b0c3949//a/b/c/d/e/f/14.webp" alt="Video thumbnail">
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+                <div class="live-badge">LIVE</div>
+                <a class="play-btn" href="" aria-label="Play video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></a>
+            </div>
+            <div class="card-footer">
+                <div class="segmented">
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 16 -->
+        <div class="card" id="card-12">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_1b0c3949//a/b/c/d/e/f/15.webp" alt="Video thumbnail">
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+                <div class="live-badge">LIVE</div>
+                <a class="play-btn" href="" aria-label="Play video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></a>
+            </div>
+            <div class="card-footer">
+                <div class="segmented">
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 17 -->
+        <div class="card" id="card-12">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_1b0c3949//a/b/c/d/e/f/25.webp" alt="Video thumbnail">
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+                <div class="live-badge">LIVE</div>
+                <a class="play-btn" href="" aria-label="Play video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></a>
+            </div>
+            <div class="card-footer">
+                <div class="segmented">
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 18 -->
+        <div class="card" id="card-12">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_1b0c3949//a/b/c/d/e/f/26.webp" alt="Video thumbnail">
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+                <div class="live-badge">LIVE</div>
+                <a class="play-btn" href="" aria-label="Play video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></a>
+            </div>
+            <div class="card-footer">
+                <div class="segmented">
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 19 -->
+        <div class="card" id="card-12">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_1b0c3949//a/b/c/d/e/f/27.webp" alt="Video thumbnail">
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+                <div class="live-badge">LIVE</div>
+                <a class="play-btn" href="" aria-label="Play video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></a>
+            </div>
+            <div class="card-footer">
+                <div class="segmented">
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+        <!-- Card 20 -->
+        <div class="card" id="card-12">
+            <div class="thumb-wrap">
+                <img class="thumb" src="https://baa.yfs.mybluehost.me/website_1b0c3949//a/b/c/d/e/f/28.gif" alt="Video thumbnail">
+                <a class="thumb-link" href="" aria-label="Open video"></a>
+                <div class="live-badge">LIVE</div>
+                <a class="play-btn" href="" aria-label="Play video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></a>
+            </div>
+            <div class="card-footer">
+                <div class="segmented">
+                    <a href="" class="seg-play" data-action="play">Play Now</a>
+                    <a href="" class="seg-download" data-action="download">Download</a>
+                    <a href="" class="seg-live" data-action="live">Live</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mobile-friendly touch feedback: add 'touch-active' class on touchstart and remove on touchend
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.segmented a').forEach(function(btn) {
+                // For keyboard accessibility add focus styles already via CSS
+
+                // Touch handling
+                btn.addEventListener('touchstart', function() {
+                    btn.classList.add('touch-active');
+                }, {
+                    passive: true
+                });
+                btn.addEventListener('touchend', function() {
+                    // small timeout to let user perceive the change
+                    setTimeout(function() {
+                        btn.classList.remove('touch-active');
+                    }, 120);
+                }, {
+                    passive: true
+                });
+
+                // Also handle mouseenter for desktop hover preview (optional)
+                btn.addEventListener('mouseenter', function() {
+                    btn.classList.add('touch-active');
+                });
+                btn.addEventListener('mouseleave', function() {
+                    btn.classList.remove('touch-active');
+                });
+            });
+
+            // Optional: collapse live badge for non-live cards
+            // If you want some cards to not show LIVE, remove the .live-badge element inside that card.
+
+            // Accessibility: allow Enter key on thumb area to open link
+            document.querySelectorAll('.thumb-link').forEach(function(link) {
+                link.setAttribute('tabindex', '0');
+                link.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' || e.keyCode === 13) link.click();
+                });
+            });
+        });
+    </script>
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"2736911702094f79b26b8b390eb5f555","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}'
+        crossorigin="anonymous"></script>
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"bc371b4bf70d497298756dd4f7ff867c","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}'
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
